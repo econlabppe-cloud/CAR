@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>סימולטור רכב צמוד מול רכב פרטי</title>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Heebo',sans-serif;direction:rtl;background:#f0f4f8;color:#1a202c;min-height:100vh;}
+.hero{background:linear-gradient(135deg,#1F3864 0%,#2E75B6 100%);padding:22px 20px 0;}
+.hero-inner{max-width:1020px;margin:0 auto;}
+.hero h1{color:#fff;font-size:20px;font-weight:900;}
+.hero p{color:rgba(255,255,255,.72);font-size:12px;margin-top:3px;}
+.tabs{display:flex;gap:5px;margin-top:16px;}
+.tab{padding:9px 20px;border-radius:8px 8px 0 0;font-size:13px;font-weight:700;font-family:'Heebo';cursor:pointer;border:none;transition:all .2s;}
+.tab.on{background:#fff;color:#1F3864;}
+.tab.off{background:rgba(255,255,255,.14);color:rgba(255,255,255,.82);}
+.tab.off:hover{background:rgba(255,255,255,.22);}
+.main{max-width:1020px;margin:0 auto;padding:18px 14px 48px;}
+.tax-bar{background:#fff;border-radius:12px;padding:11px 15px;margin-bottom:14px;border:1px solid #e2e8f0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.tax-bar label{font-weight:800;font-size:13px;color:#1F3864;flex-shrink:0;}
+.tax-note{font-size:11px;color:#2E75B6;background:#eaf3fb;padding:3px 9px;border-radius:6px;}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+@media(max-width:650px){.cols{grid-template-columns:1fr;}}
+.card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 8px rgba(31,56,100,.07);}
+.card.priv{border:2px solid #16a34a;}
+.card.comp{border:2px solid #1F3864;}
+.card-hd{padding:12px 15px;display:flex;align-items:center;gap:9px;}
+.card-hd.priv{background:linear-gradient(90deg,#dcfce7,#f0fdf4);}
+.card-hd.comp{background:linear-gradient(90deg,#dbeafe,#eff6ff);}
+.ico{font-size:20px;}
+.card-hd h2{font-size:14px;font-weight:900;}
+.card-hd.priv h2{color:#14532d;}
+.card-hd.comp h2{color:#1e3a8a;}
+.sub{font-size:11px;opacity:.65;font-weight:400;}
+.card-body{padding:14px 15px 16px;}
+.fld{margin-bottom:12px;}
+.fld>label{display:block;font-size:12px;font-weight:700;color:#374151;margin-bottom:3px;}
+.hint{font-size:11px;color:#6b7280;margin-bottom:4px;line-height:1.4;}
+.chip{font-size:11px;padding:3px 9px;border-radius:5px;display:inline-block;margin-top:3px;font-weight:600;}
+.chip.blue{background:#eaf3fb;color:#1e40af;}
+.chip.green{background:#dcfce7;color:#14532d;}
+.chip.amber{background:#fef9c3;color:#713f12;}
+.chip.pink{background:#fdf4ff;color:#6b21a8;}
+.chip.gray{background:#f1f5f9;color:#374151;}
+input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+.inp-w{position:relative;}
+.inp{width:100%;border:1.5px solid #bdd7ee;border-radius:8px;padding:8px 10px 8px 28px;font-size:14px;font-family:'Heebo';background:#f8fbfe;color:#1a202c;outline:none;transition:border-color .15s,box-shadow .15s;direction:ltr;text-align:left;}
+.inp:focus{border-color:#2E75B6;box-shadow:0 0 0 3px rgba(46,117,182,.12);background:#fff;}
+.inp.nopre{padding-left:10px;}
+.inp.pct{padding-left:10px;padding-right:26px;}
+.sym{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:12px;pointer-events:none;}
+.sym-r{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:12px;pointer-events:none;}
+select.inp{direction:rtl;text-align:right;padding-left:10px;cursor:pointer;}
+input[type=range]{width:100%;height:8px;border-radius:99px;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;background:#e2e8f0;}
+input[type=range].sl-km{background:linear-gradient(to right,#16a34a 0%,#86efac 50%,#fbbf24 80%,#ef4444 100%);}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;border:3px solid #1F3864;box-shadow:0 2px 8px rgba(31,56,100,.3);cursor:pointer;transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15);}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:#fff;border:3px solid #1F3864;box-shadow:0 2px 8px rgba(31,56,100,.3);cursor:pointer;}
+.km-slider-wrap{position:relative;padding:4px 0 18px;}
+.km-slider-labels{display:flex;justify-content:space-between;font-size:10px;color:#9ca3af;margin-top:4px;}
+.km-slider-val{text-align:center;margin:6px 0 4px;}
+.km-slider-val .big-num{font-size:22px;font-weight:900;color:#15803d;}
+.km-slider-val .unit{font-size:12px;font-weight:600;color:#6b7280;margin-right:3px;}
+.km-ticks{display:flex;justify-content:space-between;margin-top:2px;}
+.km-tick{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.km-tick .tick-line{width:1px;height:5px;background:#d1d5db;}
+.km-tick .tick-lbl{font-size:9px;color:#9ca3af;}
+.seg2{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:4px;}
+.sbtn{padding:8px 5px;border-radius:8px;text-align:center;cursor:pointer;font-family:'Heebo';font-size:11px;font-weight:600;border:1.5px solid #d1d5db;background:#fff;color:#374151;transition:all .15s;}
+.sbtn.selc{border:2px solid #1F3864;background:#1F3864;color:#fff;}
+.travel-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px;}
+.tbtn{padding:9px 4px;border-radius:8px;text-align:center;cursor:pointer;font-family:'Heebo';font-size:11px;font-weight:600;border:1.5px solid #d1d5db;background:#fff;color:#374151;transition:all .15s;}
+.tbtn.sel{border:2px solid #16a34a;background:#dcfce7;color:#14532d;}
+.zero{background:#f1f5f9;border-radius:7px;padding:7px 10px;font-size:11px;color:#374151;border:1px solid #e2e8f0;margin-bottom:10px;}
+.zero strong{color:#15803d;}
+.sep{border:none;border-top:1px dashed #e2e8f0;margin:12px 0 11px;}
+.allow-box{background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:11px 13px;margin-bottom:12px;}
+.allow-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px;border-bottom:1px dashed #bbf7d0;}
+.allow-row:last-child{border-bottom:none;padding-top:7px;font-weight:800;font-size:13px;}
+.aval{color:#15803d;font-weight:700;}
+.shovi-box{background:#fffbeb;border:1.5px solid #fbbf24;border-radius:10px;padding:10px 12px;margin-top:8px;}
+.shovi-total{font-size:13px;font-weight:800;color:#b45309;text-align:center;padding:6px 8px;background:#fff;border-radius:7px;border:2px solid #d97706;margin-top:6px;}
+.shovi-note{font-size:10px;color:#78350f;margin-top:6px;line-height:1.5;}
+.quick-cmp{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.qbox{text-align:center;border-radius:9px;padding:9px 4px;}
+.results{background:#fff;border-radius:14px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 2px 12px rgba(31,56,100,.09);}
+.verdict{padding:18px 22px;text-align:center;}
+.verdict.g{background:linear-gradient(135deg,#bbf7d0,#d4edda);border-bottom:2px solid #16a34a;}
+.verdict.b{background:linear-gradient(135deg,#bfdbfe,#dbeafe);border-bottom:2px solid #1F3864;}
+.vlabel{font-size:12px;font-weight:700;margin-bottom:3px;opacity:.8;}
+.verdict.g .vlabel,.verdict.g .vamt{color:#14532d;}
+.verdict.b .vlabel,.verdict.b .vamt{color:#1e3a8a;}
+.vbig{font-size:23px;font-weight:900;margin-bottom:5px;}
+.verdict.g .vbig{color:#14532d;}
+.verdict.b .vbig{color:#1e3a8a;}
+.vamt{font-size:13px;}
+.bars{padding:14px 18px 4px;}
+.bh{font-size:12px;font-weight:800;color:#1F3864;margin-bottom:9px;}
+.brow{margin-bottom:10px;}
+.btop{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+.blbl{font-size:11px;color:#4b5563;font-weight:600;}
+.bval{font-size:12px;font-weight:800;}
+.btrack{background:#e2e8f0;border-radius:99px;height:8px;overflow:hidden;}
+.bfill{height:100%;border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.bnote{font-size:10px;color:#9ca3af;margin-top:2px;}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px 18px;}
+@media(max-width:520px){.res-grid{grid-template-columns:1fr;}}
+.rcol h3{font-size:12px;font-weight:800;margin-bottom:9px;padding-bottom:6px;border-bottom:2px solid;}
+.rcol.rc h3{color:#c2410c;border-color:#c2410c;}
+.rcol.rp h3{color:#16a34a;border-color:#16a34a;}
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:6px;margin-bottom:2px;font-size:11px;}
+.rrow.ded{background:#fff3e0;}.rrow.ded .rv{color:#c2410c;}
+.rrow.pos{background:#dcfce7;}.rrow.pos .rv{color:#16a34a;}
+.rrow.neu{background:#f1f5f9;}
+.rrow.sub{background:#fef9c3;}
+.rrow.cap{background:#fdf4ff;}.rrow.cap .rv{color:#7e22ce;}
+.rrow.tot{font-size:13px;font-weight:800;border-radius:8px;margin-top:5px;color:#fff;}
+.rrow.tc{background:#c2410c;}.rrow.tp{background:#15803d;}.rrow.tn{background:#7f1d1d;}
+.rv{font-weight:700;white-space:nowrap;}
+.infobox{margin:0 18px 16px;background:#eaf3fb;border-radius:8px;padding:8px 12px;border:1px solid #bdd7ee;font-size:11px;color:#1e3a8a;line-height:1.6;}
+.gw{max-width:740px;margin:0 auto;}
+.gc{background:#fff;border-radius:13px;padding:18px 22px;margin-bottom:14px;border:1px solid #e2e8f0;}
+.gc h3{color:#1F3864;font-size:14px;font-weight:800;margin-bottom:10px;}
+.gc p{font-size:13px;color:#374151;line-height:1.7;}
+.gt{width:100%;border-collapse:collapse;font-size:12px;}
+.gt th{background:#1F3864;color:#fff;padding:8px 11px;text-align:right;font-weight:700;}
+.gt td{padding:7px 11px;border-bottom:1px solid #e2e8f0;color:#374151;}
+.gt tr:last-child td{border-bottom:none;}
+.gt tr:nth-child(even) td{background:#f8fbfe;}
+.wrow{display:flex;gap:9px;background:#fff8f0;border-radius:8px;padding:9px 11px;border:1px solid #fde8cc;margin-bottom:6px;}
+.wx{color:#c2410c;font-weight:800;flex-shrink:0;}
+.wt{font-weight:700;font-size:12px;color:#7c2d12;margin-bottom:1px;}
+.wd{font-size:11px;color:#92400e;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState, useMemo} = React;
+const ILS  = String.fromCharCode(8362);
+const fmt  = n => Math.round(Math.abs(n)).toLocaleString('he-IL') + ' ' + ILS;
+const fmtS = n => { const r=Math.round(n); if(!r) return '0 '+ILS; return (r>0?'+':'-')+Math.abs(r).toLocaleString('he-IL')+' '+ILS; };
+const toN  = s => parseFloat(s)||0;
+
+/* החזרים קבועים דרגה ד' */
+const ALLOW_676  = 676;
+const ALLOW_387  = 387;
+const ALLOW_340B = 340;
+
+const TRAVEL_OPTIONS = [
+  {label:'קצר',    sub:'עד 20 ק"מ',    val:323},
+  {label:'בינוני', sub:'20–40 ק"מ',   val:464},
+  {label:'רחוק',   sub:'מעל 40 ק"מ',  val:684},
+];
+
+const ENGINES = {
+  electric:      {label:'חשמלי (BEV)',           emoji:'🔋', val:1380},
+  plugin_hybrid: {label:'היברידי נטען (PHEV)',    emoji:'🔌', val:1150},
+  mild_hybrid:   {label:'היברידי (HEV)',           emoji:'⚡', val:580 },
+  petrol:        {label:'בנזין',                  emoji:'⛽', val:0   },
+};
+
+/* עלות אנרגיה לק"מ לפי סוג מנוע פרטי */
+const FUEL_COST_PER_KM = {
+  electric:      {min:0.10, max:0.13, mid:0.115, label:'10–13 אג׳ (חשמל)'},
+  plugin_hybrid: {min:0.15, max:0.21, mid:0.18,  label:'15–21 אג׳ (PHEV טעון)'},
+  mild_hybrid:   {min:0.28, max:0.37, mid:0.325, label:'28–37 אג׳ (HEV)'},
+  petrol:        {min:0.45, max:0.61, mid:0.53,  label:'45–61 אג׳ (בנזין)'},
+};
+
+const TAXES = [
+  {label:'20% | עד 7,500',                    v:0.20},
+  {label:'29% | 7,500–16,000',                v:0.29},
+  {label:'43% | 16,000–22,000',               v:0.43},
+  {label:'47% | 22,000–45,000 (ברירת מחדל)', v:0.47},
+  {label:'59% | 45,000–49,000 (פסגת ההר)',   v:0.59},
+  {label:'50% | מעל 49,000',                  v:0.50},
+];
+
+
+/* ירידת ערך — 5 מדרגות עם רצפת שווי */
+function autoDepPct(val) {
+  if (val >= 150000) return 1.25;
+  if (val >= 80000)  return 0.85;
+  if (val >= 30000)  return 0.55;
+  if (val >= 5000)   return 0.25;
+  return 0;
+}
+function depLabel(val) {
+  if (val >= 150000) return 'ירידה מהירה (1.25%/חודש)';
+  if (val >= 80000)  return 'ירידה בינונית (0.85%/חודש)';
+  if (val >= 30000)  return 'ירידה איטית (0.55%/חודש)';
+  if (val >= 5000)   return 'דעיכה עמוקה (0.25%/חודש)';
+  return 'רצפת שווי — אין ירידה';
+}
+function depColor(val) {
+  if (val >= 150000) return '#dc2626';
+  if (val >= 80000)  return '#d97706';
+  if (val >= 30000)  return '#65a30d';
+  return '#16a34a';
+}
+
+/* טיפולים לפי שווי + סוג מנוע */
+function maintPerKm(val, engineType) {
+  if (engineType === 'electric') {
+    return val >= 150000 ? 0.08 : 0.10;
+  }
+  if (val >= 140000) return 0.15;
+  if (val >= 70000)  return 0.20;
+  return 0.27;
+}
+function maintLabel(val, engineType) {
+  if (engineType === 'electric') return val >= 150000 ? '8 אג\' (EV חדש)' : '10 אג\' (EV)';
+  if (val >= 140000) return '15 אג\' (חדש/יקר)';
+  if (val >= 70000)  return '20 אג\' (בינוני)';
+  return '27 אג\' (ישן)';
+}
+
+function Inp({val, set, nopre, pct, step='any', min=0}) {
+  return (
+    <div className="inp-w">
+      {!nopre && !pct && <span className="sym">{ILS}</span>}
+      {pct && <span className="sym-r">%</span>}
+      <input type="number" step={step} min={min}
+        className={'inp'+(nopre?' nopre':pct?' pct':'')}
+        value={val}
+        onChange={e => set(e.target.value)}
+        onBlur={e => { if(e.target.value===''||e.target.value==='-') set('0'); }}
+      />
+    </div>
+  );
+}
+
+function App() {
+  const [tab,     setTab]     = useState('sim');
+  const [tax,     setTax]     = useState(0.47);
+
+  /* רכב צמוד */
+  const [listPrice, setListPrice] = useState('170000');
+  const [compCarType, setCompCarType] = useState('electric');
+  const [privCarType, setPrivCarType] = useState('electric');
+
+  /* רכב פרטי */
+  const [currentVal,  setCurrentVal]  = useState('120000');
+  const [annualKm,    setAnnualKm]    = useState('18000');
+  const [travelOpt,   setTravelOpt]   = useState(1);
+
+  /* עלות הון */
+  const [equityPct, setEquityPct] = useState(50);
+  const [loanRate,  setLoanRate]  = useState('4');
+  const [altRate,   setAltRate]   = useState('4');
+
+  const c = useMemo(() => {
+    const listN   = toN(listPrice);
+    const curValN = toN(currentVal);
+    const annKm   = toN(annualKm);
+    const loanR   = toN(loanRate);
+    const altR    = toN(altRate);
+    const eqPct   = equityPct / 100;
+    const monthKm = annKm / 12;
+
+    /* ===== רכב צמוד ===== */
+    const shovi    = Math.max(0, listN * 0.0248 - ENGINES[compCarType].val);
+    const compCost = shovi * tax;
+
+    /* ===== החזרים — רק ברכב פרטי ===== */
+    const allow676net  = ALLOW_676;
+    const allow387net  = ALLOW_387;
+    const allow340net  = ALLOW_340B * (1 - tax);
+    const travelNet    = TRAVEL_OPTIONS[travelOpt].val;
+    const totalAllowNet = allow676net + allow387net + allow340net + travelNet;
+
+    /* ===== עלויות רכב פרטי — ללא ביטוח/אגרה (מגולם) ===== */
+    const fuelPerKm    = FUEL_COST_PER_KM[privCarType] ? FUEL_COST_PER_KM[privCarType].mid : 0.53;
+    const fuelMonthly  = monthKm * fuelPerKm;
+
+    /* טיפולים — לפי שווי וסוג מנוע */
+    const mPerKm       = maintPerKm(curValN, privCarType);
+    const maintMonthly = monthKm * mPerKm;
+
+    /* ירידת ערך */
+    const depPct       = autoDepPct(curValN);
+    const depMonthly   = curValN * depPct / 100;
+
+    /* עלות הון */
+    const loanAmt   = curValN * (1 - eqPct);
+    const equityAmt = curValN * eqPct;
+    const loanCost  = loanAmt   * (loanR / 100) / 12;
+    const altCost   = equityAmt * (altR  / 100) / 12;
+    const capCost   = loanCost + altCost;
+
+    /* סה"כ הוצאות */
+    const privExpenses = fuelMonthly + maintMonthly + depMonthly + capCost;
+
+    /* מאזן: הכנסות (החזרים בלבד) פחות הוצאות */
+    const privNet   = totalAllowNet - privExpenses;
+
+    /* הכרעה */
+    const adv       = privNet - (-compCost);
+    const privWins  = adv > 0;
+    const maxBar    = Math.max(compCost, privExpenses, totalAllowNet, 200);
+
+    return {
+      listN, curValN, showi: shovi, compCost,
+      allow676net, allow387net, allow340net, travelNet, totalAllowNet,
+      fuelPerKm, fuelMonthly,
+      mPerKm, maintMonthly,
+      depPct, depMonthly,
+      loanAmt, equityAmt, loanCost, altCost, capCost,
+      privExpenses, privNet, adv, privWins, maxBar, monthKm,
+    };
+  }, [tax, listPrice, compCarType, privCarType, currentVal, annualKm, travelOpt, equityPct, loanRate, altRate]);
+
+  const tp = Math.round(tax*100);
+  const np = Math.round((1-tax)*100);
+
+  return (
+    <div>
+      <div className="hero">
+        <div className="hero-inner">
+          <div style={{display:'flex',alignItems:'center',gap:11,marginBottom:4}}>
+            <div style={{background:'rgba(255,255,255,.14)',borderRadius:9,padding:'7px 9px',fontSize:20}}>🚗</div>
+            <div>
+              <h1>סימולטור רכב צמוד מול רכב פרטי</h1>
+              <p>שירות המדינה — חישוב נטו הפנוי בזמן אמת</p>
+            </div>
+          </div>
+          <div className="tabs">
+            <button className={'tab '+(tab==='sim'?'on':'off')} onClick={()=>setTab('sim')}>🧮 סימולטור</button>
+            <button className={'tab '+(tab==='guide'?'on':'off')} onClick={()=>setTab('guide')}>📖 מדריך</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="main">
+      {tab==='sim' ? (<>
+
+        <div className="tax-bar">
+          <label>מדרגת מס שולי:</label>
+          <select className="inp" style={{maxWidth:300,flex:1}} value={tax} onChange={e=>setTax(parseFloat(e.target.value))}>
+            {TAXES.map(r=><option key={r.v} value={r.v}>{r.label}</option>)}
+          </select>
+          <div className="tax-note">מס {tp}% &bull; נטו {np}% לשקל האחרון</div>
+        </div>
+
+        <div className="cols">
+
+          {/* ===== רכב פרטי ===== */}
+          <div className="card priv">
+            <div className="card-hd priv">
+              <span className="ico">🚗</span>
+              <div><h2>רכב פרטי</h2><div className="sub">הכנסות מול הוצאות</div></div>
+            </div>
+            <div className="card-body">
+
+              {/* הכנסות */}
+              <div className="allow-box">
+                <div style={{fontSize:12,fontWeight:800,color:'#14532d',marginBottom:8}}>
+                  ✅ הכנסות — החזרים (דרגה ד')
+                </div>
+                <div className="allow-row">
+                  <span>קבועות נטו (מגולם)</span>
+                  <span className="aval">+{fmt(c.allow676net + c.allow387net)}</span>
+                </div>
+                <div className="allow-row">
+                  <span>אגרה/טסט ({ALLOW_340B}{ILS} ברוטו, {np}% נטו)</span>
+                  <span className="aval">+{fmt(c.allow340net)}</span>
+                </div>
+                <div style={{borderTop:'1px dashed #86efac',marginTop:6,paddingTop:6,marginBottom:4}}>
+                  <div style={{fontSize:11,fontWeight:700,color:'#14532d',marginBottom:5}}>
+                    🚌 החזר נסיעות (מגולם) — מרחק מהעבודה:
+                  </div>
+                  <div className="travel-btns">
+                    {TRAVEL_OPTIONS.map((o,i)=>(
+                      <button key={i} className={'tbtn'+(travelOpt===i?' sel':'')}
+                        onClick={()=>setTravelOpt(i)}>
+                        <div style={{fontWeight:800,fontSize:12}}>{o.label}</div>
+                        <div style={{fontSize:10,opacity:.75,marginBottom:2}}>{o.sub}</div>
+                        <div style={{fontSize:13,fontWeight:900,color:travelOpt===i?'#14532d':'#374151'}}>
+                          +{fmt(o.val)}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="allow-row">
+                  <span style={{fontWeight:800,color:'#14532d'}}>סה"כ הכנסות חודשיות</span>
+                  <span style={{fontWeight:900,fontSize:14,color:'#14532d'}}>+{fmt(c.totalAllowNet)}</span>
+                </div>
+              </div>
+
+              <hr className="sep" />
+
+              {/* הוצאות */}
+              <div style={{fontSize:12,fontWeight:800,color:'#c2410c',marginBottom:9}}>
+                ❌ הוצאות — עלות הרכב
+              </div>
+
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:10}}>
+                <div className="fld" style={{marginBottom:0}}>
+                  <label>שווי שוק נוכחי</label>
+                  <Inp val={currentVal} set={setCurrentVal} />
+                  {toN(currentVal)>0 && (
+                    <div className="chip amber" style={{color:depColor(toN(currentVal))}}>
+                      {depLabel(toN(currentVal))}
+                    </div>
+                  )}
+                </div>
+                <div className="fld" style={{marginBottom:0}}>
+                  <label>ק"מ שנתי כולל</label>
+                  <div className="hint">לחישוב דלק ובלאי</div>
+                  <div className="km-slider-wrap">
+                    <div className="km-slider-val">
+                      <span className="big-num">{parseInt(annualKm).toLocaleString('he-IL')}</span>
+                      <span className="unit">ק"מ/שנה</span>
+                      <span style={{fontSize:11,color:'#6b7280',marginRight:6}}>({Math.round(toN(annualKm)/12).toLocaleString('he-IL')} ק"מ/חודש)</span>
+                    </div>
+                    <input type="range" className="sl-km" min={5000} max={60000} step={1000}
+                      value={annualKm} onChange={e=>setAnnualKm(e.target.value)} />
+                    <div className="km-slider-labels">
+                      <span>5,000 ק"מ</span>
+                      <span>60,000 ק"מ</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+              <div className="fld">
+                <label>סוג מנוע — לחישוב טיפולים</label>
+                <div className="seg2">
+                  {Object.entries(ENGINES).map(([k,e])=>(
+                    <button key={k} className={'sbtn'+(privCarType===k?' selc':'')} onClick={()=>setPrivCarType(k)}>
+                      <div style={{fontSize:15,marginBottom:2}}>{e.emoji}</div>
+                      <div>{e.label}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="zero" style={{background:'#eff6ff',border:'1px solid #93c5fd'}}>
+                ⛽ עלות אנרגיה: <strong>{FUEL_COST_PER_KM[privCarType].label}</strong>
+                &nbsp;&rarr;&nbsp;<strong>{(c.fuelPerKm*100).toFixed(1)} אג׳/ק"מ = {fmt(c.fuelMonthly)}/חודש</strong>
+              </div>
+
+              <div className="zero">
+                🔧 טיפולים: <strong>{maintLabel(toN(currentVal), privCarType)}</strong>
+                &rarr; <strong>{fmt(c.maintMonthly)}/חודש</strong>
+                &nbsp;({Math.round(c.monthKm).toLocaleString('he-IL')} ק"מ × {ILS}{c.mPerKm.toFixed(2)})
+              </div>
+
+              <div style={{background:'#fdf4ff',border:'1px solid #d8b4fe',borderRadius:10,padding:'11px 12px'}}>
+                <div style={{fontSize:12,fontWeight:800,color:'#6b21a8',marginBottom:7}}>💰 עלות הון</div>
+                <div style={{fontSize:11,color:'#7e22ce',marginBottom:4,fontWeight:600}}>
+                  הון עצמי {equityPct}% ({fmt(c.equityAmt)}) | הלוואה {100-equityPct}% ({fmt(c.loanAmt)})
+                </div>
+                <input type="range" min={0} max={100} step={5}
+                  style={{width:'100%',marginBottom:3,accentColor:'#7c3aed'}}
+                  value={equityPct} onChange={e=>setEquityPct(parseInt(e.target.value))} />
+                <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'#9ca3af',marginBottom:8}}>
+                  <span>100% הלוואה</span><span>100% הון עצמי</span>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:6}}>
+                  <div>
+                    <div style={{fontSize:11,fontWeight:700,color:'#7e22ce',marginBottom:3}}>ריבית הלוואה</div>
+                    <Inp val={loanRate} set={setLoanRate} pct step="0.1" />
+                  </div>
+                  <div>
+                    <div style={{fontSize:11,fontWeight:700,color:'#7e22ce',marginBottom:3}}>תשואה אלטרנטיבית</div>
+                    <Inp val={altRate} set={setAltRate} pct step="0.1" />
+                  </div>
+                </div>
+                <div className="chip pink">
+                  הלוואה {fmt(c.loanCost)} + הון עצמי {fmt(c.altCost)} = <strong>{fmt(c.capCost)}/חודש</strong>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* ===== רכב צמוד ===== */}
+          <div className="card comp">
+            <div className="card-hd comp">
+              <span className="ico">🏢</span>
+              <div><h2>רכב צמוד (צמוד)</h2><div className="sub">מס שווי שימוש בלבד</div></div>
+            </div>
+            <div className="card-body">
+
+              <div className="fld">
+                <label>מחיר מחירון</label>
+                <div className="hint">2.48% מהמחיר לחודש — בסיס לחישוב שווי שימוש</div>
+                <Inp val={listPrice} set={setListPrice} />
+                {c.listN>0 && <div className="chip amber">שווי רעיוני: {fmt(c.listN*0.0248)}/חודש</div>}
+              </div>
+
+              <div className="fld">
+                <label>סוג מנוע</label>
+                <div className="seg2">
+                  {Object.entries(ENGINES).map(([k,e])=>(
+                    <button key={k} className={'sbtn'+(compCarType===k?' selc':'')} onClick={()=>setCompCarType(k)}>
+                      <div style={{fontSize:15,marginBottom:2}}>{e.emoji}</div>
+                      <div>{e.label}</div>
+                      <div style={{fontSize:10,opacity:.8,marginTop:1}}>
+                        {e.val>0?'הפחתה '+ILS+e.val.toLocaleString('he-IL'):'ללא הפחתה'}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="shovi-box">
+                <div style={{fontSize:11,fontWeight:700,color:'#78350f',marginBottom:7}}>חישוב עלות חודשית:</div>
+                <div className="rrow sub" style={{marginBottom:2}}>
+                  <span>2.48% × {fmt(c.listN)}</span><span className="rv">{fmt(c.listN*0.0248)}</span>
+                </div>
+                <div className="rrow ded" style={{marginBottom:2}}>
+                  <span>הפחתת מנוע ({ENGINES[compCarType].label})</span>
+                  <span className="rv">- {fmt(ENGINES[compCarType].val)}</span>
+                </div>
+                <div className="rrow" style={{background:'#fef9c3',marginBottom:2}}>
+                  <span style={{fontWeight:700}}>שווי חייב במס</span>
+                  <span className="rv">{fmt(c.showi)}</span>
+                </div>
+                <div className="rrow ded" style={{marginBottom:4}}>
+                  <span>× מס {tp}%</span>
+                  <span className="rv">- {fmt(c.compCost)}</span>
+                </div>
+                <div className="shovi-total">עלות נטו חודשית: {fmt(c.compCost)}</div>
+                <div className="shovi-note">
+                  דלק, ביטוח, אגרה, טיפולים — על המעסיק.<br/>
+                  כל ההחזרים (676 + 387 + 340 + נסיעות) — <strong>לא משולמים</strong>.
+                </div>
+              </div>
+
+              <div className="quick-cmp">
+                <div className="qbox" style={{background:'#fff7ed',border:'1px solid #fed7aa'}}>
+                  <div style={{fontSize:10,color:'#9a3412',fontWeight:700}}>עלות רכב צמוד</div>
+                  <div style={{fontSize:17,fontWeight:900,color:'#c2410c'}}>- {fmt(c.compCost)}</div>
+                  <div style={{fontSize:10,color:'#9a3412'}}>לחודש</div>
+                </div>
+                <div className="qbox" style={{
+                  background:c.privNet>=0?'#f0fdf4':'#fff1f2',
+                  border:c.privNet>=0?'1px solid #86efac':'1px solid #fecaca'}}>
+                  <div style={{fontSize:10,color:c.privNet>=0?'#14532d':'#991b1b',fontWeight:700}}>מאזן רכב פרטי</div>
+                  <div style={{fontSize:17,fontWeight:900,color:c.privNet>=0?'#15803d':'#dc2626'}}>{fmtS(c.privNet)}</div>
+                  <div style={{fontSize:10,color:c.privNet>=0?'#14532d':'#991b1b'}}>לחודש</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        {/* ===== תוצאות ===== */}
+        <div className="results">
+
+          <div className={'verdict '+(c.privWins?'g':'b')}>
+            <div className="vlabel">המלצה פיננסית</div>
+            <div className="vbig">{c.privWins?'🚗 רכב פרטי עדיף':'🏢 רכב צמוד עדיף'}</div>
+            <div className="vamt">
+              יתרון חודשי: <strong style={{fontSize:18}}>{fmt(Math.abs(c.adv))}</strong>
+              &nbsp;&bull;&nbsp; שנתי: <strong>{fmt(Math.abs(c.adv)*12)}</strong>
+            </div>
+          </div>
+
+          <div className="bars">
+            <div className="bh">השוואה חזותית — חודשי</div>
+            {[
+              {label:'עלות רכב צמוד (מס שווי שימוש)',
+               val:c.compCost, color:'#c2410c',
+               note:'שווי '+fmt(c.showi)+' × '+tp+'%'},
+              {label:'הוצאות רכב פרטי (דלק + טיפול + ירידת ערך + הון)',
+               val:c.privExpenses, color:'#dc2626',
+               note:'דלק '+fmt(c.fuelMonthly)+' | טיפול '+fmt(c.maintMonthly)+' | ירידת ערך '+fmt(c.depMonthly)+' | הון '+fmt(c.capCost)},
+              {label:'הכנסות רכב פרטי (החזרים + נסיעות)',
+               val:c.totalAllowNet, color:'#16a34a',
+               note:'קבועות נטו + 340×'+np+'% + נסיעות '+fmt(c.travelNet)},
+            ].map(b=>(
+              <div key={b.label} className="brow">
+                <div className="btop">
+                  <span className="blbl">{b.label}</span>
+                  <span className="bval" style={{color:b.color}}>{fmt(b.val)}</span>
+                </div>
+                <div className="btrack">
+                  <div className="bfill" style={{width:Math.min(100,b.val/c.maxBar*100)+'%',background:b.color}}/>
+                </div>
+                <div className="bnote">{b.note}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="res-grid">
+            <div className="rcol rc">
+              <h3>א. רכב צמוד</h3>
+              <div className="rrow sub"><span>2.48% × מחיר</span><span className="rv">{fmt(c.listN*0.0248)}</span></div>
+              <div className="rrow ded"><span>הפחתת מנוע</span><span className="rv">-{fmt(ENGINES[compCarType].val)}</span></div>
+              <div className="rrow sub"><span style={{fontWeight:700}}>שווי חייב</span><span className="rv">{fmt(c.showi)}</span></div>
+              <div className="rrow ded"><span>× מס {tp}%</span><span className="rv">-{fmt(c.compCost)}</span></div>
+              <div className="rrow tot tc"><span>עלות נטו חודשית</span><span>-{fmt(c.compCost)}</span></div>
+            </div>
+            <div className="rcol rp">
+              <h3>ב. רכב פרטי</h3>
+              <div className="rrow pos"><span>קבועות נטו (מגולם)</span><span className="rv">+{fmt(c.allow676net+c.allow387net)}</span></div>
+              <div className="rrow pos"><span>אגרה/טסט (ברוטו → נטו)</span><span className="rv">+{fmt(c.allow340net)}</span></div>
+              <div className="rrow pos"><span>החזר נסיעות ({TRAVEL_OPTIONS[travelOpt].label})</span><span className="rv">+{fmt(c.travelNet)}</span></div>
+              <div className="rrow ded"><span>אנרגיה ({(c.fuelPerKm*100).toFixed(1)} אג׳/ק"מ)</span><span className="rv">-{fmt(c.fuelMonthly)}</span></div>
+              <div className="rrow ded"><span>טיפולים ({ILS}{c.mPerKm.toFixed(2)}/ק"מ)</span><span className="rv">-{fmt(c.maintMonthly)}</span></div>
+              <div className="rrow ded"><span>ירידת ערך ({c.depPct.toFixed(2)}%/חודש)</span><span className="rv">-{fmt(c.depMonthly)}</span></div>
+              <div className="rrow cap"><span>עלות הון</span><span className="rv">-{fmt(c.capCost)}</span></div>
+              <div className={'rrow tot '+(c.privNet>=0?'tp':'tn')}><span>מאזן נטו</span><span>{fmtS(c.privNet)}</span></div>
+            </div>
+          </div>
+
+          <div className="infobox">
+            <strong>מתודולוגיה:</strong> החזרים (676+387 מגולם, 340 ברוטו, נסיעות מגולם) — קיימים רק ברכב פרטי. רכב צמוד מאבד את כולם. עלויות: דלק לפי {ILS}6.70÷ק"מ/ל', טיפולים לפי שווי וסוג מנוע, ירידת ערך 5 מדרגות עם רצפת שווי.
+          </div>
+
+        </div>
+
+      </>) : (
+        <div className="gw">
+          <div className="gc">
+            <h3>📋 שווי שימוש ברכב צמוד</h3>
+            <p>רכב צמוד = הטבה חייבת במס: <strong>2.48% ממחיר המחירון לחודש</strong>, בניכוי הפחתה לפי סוג מנוע. מתווסף לברוטו ומחויב במס שולי מלא. דלק, ביטוח, אגרה וטיפולים — על המעסיק. אך כל ההחזרים הקבועים (676+387+340+נסיעות) נמחקים לחלוטין.</p>
+          </div>
+          <div className="gc">
+            <h3>⚡ הפחתות שווי שימוש לפי סוג מנוע</h3>
+            <table className="gt">
+              <thead><tr><th>סוג מנוע</th><th>הפחתה חודשית</th><th>חיסכון נטו (47%)</th></tr></thead>
+              <tbody>
+                <tr><td>🔋 חשמלי (EV)</td><td style={{fontWeight:700,color:'#15803d'}}>{ILS}1,380</td><td style={{color:'#15803d',fontWeight:700}}>~{ILS}649</td></tr>
+                <tr><td>🔌 היברידי נטען (PHEV)</td><td style={{fontWeight:700}}>{ILS}1,150</td><td style={{fontWeight:700}}>~{ILS}541</td></tr>
+                <tr><td>⚡ היברידי (HEV)</td><td style={{fontWeight:700}}>{ILS}580</td><td style={{fontWeight:700}}>~{ILS}273</td></tr>
+                <tr><td>⛽ בנזין / דיזל</td><td style={{fontWeight:700,color:'#c2410c'}}>{ILS}0</td><td style={{color:'#c2410c'}}>אין</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="gc">
+            <h3>📉 ירידת ערך — 5 מדרגות עם רצפת שווי</h3>
+            <table className="gt">
+              <thead><tr><th>שווי נוכחי</th><th>קצב חודשי</th><th>הגיון כלכלי</th></tr></thead>
+              <tbody>
+                <tr><td>מעל {ILS}150,000</td><td style={{fontWeight:700,color:'#dc2626'}}>1.25%</td><td>רכב חדש — ירידה מהירה</td></tr>
+                <tr><td>{ILS}80,000–150,000</td><td style={{fontWeight:700,color:'#d97706'}}>0.85%</td><td>יד שנייה צעירה</td></tr>
+                <tr><td>{ILS}30,000–80,000</td><td style={{fontWeight:700,color:'#65a30d'}}>0.55%</td><td>מתיישן — ירידה איטית</td></tr>
+                <tr><td>{ILS}5,000–30,000</td><td style={{fontWeight:700,color:'#16a34a'}}>0.25%</td><td>דעיכה עמוקה</td></tr>
+                <tr><td>מתחת ל-{ILS}5,000</td><td style={{fontWeight:700}}>0%</td><td>רצפת שווי — אין ירידה</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="gc">
+            <h3>🔧 טיפולים ותחזוקה לפי שווי + מנוע</h3>
+            <table className="gt">
+              <thead><tr><th>קבוצת שווי</th><th>עלות לק"מ</th><th>הגיון</th></tr></thead>
+              <tbody>
+                <tr><td>EV מעל {ILS}150,000</td><td style={{fontWeight:700,color:'#15803d'}}>7–8 אג׳</td><td>כמעט אין שמנים/פילטרים — צמיגים בלבד</td></tr>
+                <tr><td>EV אחר</td><td style={{fontWeight:700,color:'#15803d'}}>10 אג׳</td><td>תחזוקה מינימלית</td></tr>
+                <tr><td>מעל {ILS}140,000 (שב"כ)</td><td style={{fontWeight:700}}>15 אג׳</td><td>מוסך מורשה, אחריות יבואן</td></tr>
+                <tr><td>{ILS}70,000–140,000</td><td style={{fontWeight:700}}>20 אג׳</td><td>יוצא מאחריות, בלאי טבעי</td></tr>
+                <tr><td>מתחת ל-{ILS}70,000</td><td style={{fontWeight:700,color:'#c2410c'}}>27 אג׳</td><td>תקלות תדירות, חלפים זולים</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="gc">
+            <h3>⚠️ טעויות נפוצות</h3>
+            {[
+              ['שוכחים שרכב צמוד מוחק את כל ההחזרים','676+387+340+נסיעות = ~1,400-1,700 שנמחקים'],
+              ['לא מחשבים ירידת ערך','ההוצאה הגדולה — עשרות אלפים בשנה'],
+              ['מתעלמים מעלות הון','הכסף ברכב עולה כסף — הלוואה או תשואה שהוחמצה'],
+            ].map(([t,d])=>(
+              <div key={t} className="wrow">
+                <span className="wx">✗</span>
+                <div><div className="wt">{t}</div><div className="wd">{d}</div></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>
