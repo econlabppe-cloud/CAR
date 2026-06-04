@@ -256,6 +256,11 @@ function App() {
   const [loanRate,  setLoanRate]  = useState('4');
   const [altRate,   setAltRate]   = useState('4');
 
+  /* שקלול רכב שני וק"מ בונוס */
+  const [hasSecondCar,    setHasSecondCar]    = useState(false);
+  const [secondCarKm,     setSecondCarKm]     = useState('5000');   /* ק"מ שנתי מהרכב השני */
+  const [bonusKmPct,      setBonusKmPct]      = useState(12);       /* % ק"מ בונוס ברכב צמוד */
+
   const c = useMemo(() => {
     const listN   = toN(listPrice);
     const curValN = toN(currentVal);
@@ -263,6 +268,7 @@ function App() {
     const loanR   = toN(loanRate);
     const altR    = toN(altRate);
     const eqPct   = equityPct / 100;
+    const secondCarKmN = toN(secondCarKm);
     const monthKm = annKm / 12;
 
     /* ===== רכב צמוד ===== */
@@ -298,11 +304,24 @@ function App() {
     /* סה"כ הוצאות */
     const privExpenses = fuelMonthly + maintMonthly + depMonthly + capCost;
 
+    /* ===== שקלול רכב שני וק"מ בונוס ===== */
+    const costPerKm = fuelPerKm + mPerKm;   /* עלות ריאלית לק"מ (דלק + בלאי) */
+
+    /* הסטת ק"מ מרכב שני — חיסכון מלא */
+    const secondCarMonthKm    = hasSecondCar ? secondCarKmN / 12 : 0;
+    const secondCarSaving     = secondCarMonthKm * costPerKm;   /* חיסכון מלא */
+
+    /* ק"מ בונוס ברכב צמוד — שווים חצי מהעלות */
+    const bonusMonthKm        = monthKm * (bonusKmPct / 100);
+    const bonusValue          = bonusMonthKm * costPerKm * 0.5;  /* חצי ערך */
+
+    const compBonus           = secondCarSaving + bonusValue;    /* יתרון נסתר לצמוד */
+
     /* מאזן: הכנסות (החזרים בלבד) פחות הוצאות */
     const privNet   = totalAllowNet - privExpenses;
 
-    /* הכרעה */
-    const adv       = privNet - (-compCost);
+    /* הכרעה — כולל יתרון נסתר לצמוד */
+    const adv       = privNet - (-compCost + compBonus);
     const privWins  = adv > 0;
     const maxBar    = Math.max(compCost, privExpenses, totalAllowNet, 200);
 
@@ -314,8 +333,9 @@ function App() {
       depPct, depMonthly,
       loanAmt, equityAmt, loanCost, altCost, capCost,
       privExpenses, privNet, adv, privWins, maxBar, monthKm,
+      costPerKm, secondCarMonthKm, secondCarSaving, bonusMonthKm, bonusValue, compBonus,
     };
-  }, [tax, listPrice, compCarType, privCarType, currentVal, annualKm, travelOpt, equityPct, loanRate, altRate]);
+  }, [tax, listPrice, compCarType, privCarType, currentVal, annualKm, travelOpt, equityPct, loanRate, altRate, hasSecondCar, secondCarKm, bonusKmPct]);
 
   const tp = Math.round(tax*100);
   const np = Math.round((1-tax)*100);
@@ -535,6 +555,59 @@ function App() {
                 <div className="shovi-note">
                   דלק, ביטוח, אגרה, טיפולים — על המעסיק.<br/>
                   כל ההחזרים (676 + 387 + 340 + נסיעות) — <strong>לא משולמים</strong>.
+                </div>
+              </div>
+
+              {/* יתרון נסתר לרכב צמוד */}
+              <div style={{background:'#f0f9ff',border:'1.5px solid #7dd3fc',borderRadius:10,padding:'11px 12px',marginTop:12}}>
+                <div style={{fontSize:12,fontWeight:800,color:'#0369a1',marginBottom:9}}>
+                  🎁 יתרון נסתר — ק"מ בחינם
+                </div>
+
+                {/* ק"מ בונוס */}
+                <div style={{marginBottom:10}}>
+                  <div style={{fontSize:11,fontWeight:700,color:'#0c4a6e',marginBottom:3}}>
+                    ק"מ בונוס (דלק חינם מעודד נסיעה) — {bonusKmPct}%
+                  </div>
+                  <input type="range" min={0} max={25} step={1}
+                    style={{width:'100%',accentColor:'#0369a1'}}
+                    value={bonusKmPct} onChange={e=>setBonusKmPct(parseInt(e.target.value))} />
+                  <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'#9ca3af'}}>
+                    <span>0%</span><span>25%</span>
+                  </div>
+                  <div style={{fontSize:11,color:'#0369a1',marginTop:3}}>
+                    {Math.round(c.bonusMonthKm).toLocaleString('he-IL')} ק"מ/חודש × חצי ערך = <strong>+{fmt(c.bonusValue)}/חודש</strong>
+                  </div>
+                </div>
+
+                {/* רכב שני */}
+                <div style={{borderTop:'1px dashed #bae6fd',paddingTop:9}}>
+                  <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
+                    <input type="checkbox" id="secondCar" checked={hasSecondCar}
+                      onChange={e=>setHasSecondCar(e.target.checked)}
+                      style={{width:16,height:16,cursor:'pointer',accentColor:'#0369a1'}} />
+                    <label htmlFor="secondCar" style={{fontSize:11,fontWeight:700,color:'#0c4a6e',cursor:'pointer'}}>
+                      יש רכב שני בבית — ק"מ מועברים לצמוד
+                    </label>
+                  </div>
+                  {hasSecondCar && (<>
+                    <div style={{fontSize:11,color:'#0c4a6e',marginBottom:4,fontWeight:600}}>ק"מ שנתי שיועברו מהרכב השני:</div>
+                    <input type="range" min={0} max={20000} step={500}
+                      style={{width:'100%',accentColor:'#0369a1'}}
+                      value={secondCarKm} onChange={e=>setSecondCarKm(e.target.value)} />
+                    <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'#9ca3af',marginBottom:3}}>
+                      <span>0</span><span>20,000 ק"מ</span>
+                    </div>
+                    <div style={{fontSize:11,color:'#0369a1'}}>
+                      {parseInt(secondCarKm).toLocaleString('he-IL')} ק"מ/שנה ({Math.round(c.secondCarMonthKm).toLocaleString('he-IL')}/חודש) × חיסכון מלא = <strong>+{fmt(c.secondCarSaving)}/חודש</strong>
+                    </div>
+                  </>)}
+                </div>
+
+                {/* סיכום */}
+                <div style={{marginTop:9,background:'#fff',borderRadius:7,padding:'7px 10px',border:'1px solid #7dd3fc',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                  <span style={{fontSize:12,fontWeight:700,color:'#0369a1'}}>סה"כ יתרון נסתר לצמוד</span>
+                  <span style={{fontSize:15,fontWeight:900,color:'#0369a1'}}>+{fmt(c.compBonus)}/חודש</span>
                 </div>
               </div>
 
