@@ -1,32 +1,53 @@
+
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>סימולטור רכב צמוד מול רכב פרטי</title>
+<title>סימולטור רכב צמוד — שירות המדינה</title>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HN2KQSB70R"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-HN2KQSB70R');
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Heebo',sans-serif;direction:rtl;background:#f0f4f8;color:#1a202c;min-height:100vh;}
-.hero{background:linear-gradient(135deg,#1F3864 0%,#2E75B6 100%);padding:22px 20px 0;}
-.hero-inner{max-width:1020px;margin:0 auto;}
-.hero h1{color:#fff;font-size:20px;font-weight:900;}
-.hero p{color:rgba(255,255,255,.72);font-size:12px;margin-top:3px;}
+body{font-family:'Heebo',sans-serif;direction:rtl;background:linear-gradient(135deg,#f8fafc 0%,#eff6ff 50%,#eef2ff 100%);color:#1a202c;min-height:100vh;padding-bottom:64px;}
 .tabs{display:flex;gap:5px;margin-top:16px;}
 .tab{padding:9px 20px;border-radius:8px 8px 0 0;font-size:13px;font-weight:700;font-family:'Heebo';cursor:pointer;border:none;transition:all .2s;}
-.tab.on{background:#fff;color:#1F3864;}
-.tab.off{background:rgba(255,255,255,.14);color:rgba(255,255,255,.82);}
+.tab.on{background:#fff;color:#1e3a8a;font-weight:800;}
+.tab.off{background:rgba(255,255,255,.12);color:rgba(255,255,255,.80);backdrop-filter:blur(4px);}
 .tab.off:hover{background:rgba(255,255,255,.22);}
-.main{max-width:1020px;margin:0 auto;padding:18px 14px 48px;}
-.tax-bar{background:#fff;border-radius:12px;padding:11px 15px;margin-bottom:14px;border:1px solid #e2e8f0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.main{max-width:1020px;margin:0 auto;padding:20px 14px 52px;}
+.tax-bar{background:linear-gradient(to left,#f8fafc,#eff6ff);border-radius:14px;padding:12px 16px;margin-bottom:14px;border:2px solid #e0e7ff;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 1px 4px rgba(99,102,241,.08);}
 .tax-bar label{font-weight:800;font-size:13px;color:#1F3864;flex-shrink:0;}
 .tax-note{font-size:11px;color:#2E75B6;background:#eaf3fb;padding:3px 9px;border-radius:6px;}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
-@media(max-width:650px){.cols{grid-template-columns:1fr;}}
-.card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 8px rgba(31,56,100,.07);}
+@media(max-width:650px){
+  .cols{grid-template-columns:1fr;}
+  .card-body{padding:12px 12px 14px;}
+  .res-grid{grid-template-columns:1fr;padding:12px 14px;}
+  .bars{padding:12px 14px 4px;}
+  .km-box{margin:12px 14px 0;}
+  .infobox{margin:0 14px 14px;}
+  .verdict{padding:14px 16px;}
+  .gw{padding:0;}
+  .gc{padding:14px 16px;margin-bottom:12px;}
+  .gt td,.gt th{padding:6px 8px;font-size:11px;}
+}
+@media(max-width:400px){
+  .card-hd h2{font-size:13px;}
+  .seg2{grid-template-columns:1fr 1fr;}
+  .travel-btns{grid-template-columns:1fr 1fr 1fr;}
+}
+.card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(148,163,184,.15),0 1px 4px rgba(0,0,0,.04);}
 .card.priv{border:2px solid #16a34a;}
 .card.comp{border:2px solid #1F3864;}
 .card-hd{padding:12px 15px;display:flex;align-items:center;gap:9px;}
@@ -59,9 +80,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 select.inp{direction:rtl;text-align:right;padding-left:10px;cursor:pointer;}
 input[type=range]{width:100%;height:8px;border-radius:99px;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;background:#e2e8f0;}
 input[type=range].sl-km{background:linear-gradient(to right,#16a34a 0%,#86efac 50%,#fbbf24 80%,#ef4444 100%);}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;border:3px solid #1F3864;box-shadow:0 2px 8px rgba(31,56,100,.3);cursor:pointer;transition:transform .15s;}
-input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15);}
-input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:#fff;border:3px solid #1F3864;box-shadow:0 2px 8px rgba(31,56,100,.3);cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#4f46e5);cursor:pointer;box-shadow:0 2px 8px rgba(59,130,246,.5);transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.12);}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#4f46e5);cursor:pointer;border:none;box-shadow:0 2px 8px rgba(59,130,246,.5);}
+.contract-btn{transition:all 0.2s ease;}
+.contract-btn:hover{transform:translateY(-1px);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.fade-in{animation:fadeIn .3s ease both;}
 .km-slider-wrap{position:relative;padding:4px 0 18px;}
 .km-slider-labels{display:flex;justify-content:space-between;font-size:10px;color:#9ca3af;margin-top:4px;}
 .km-slider-val{text-align:center;margin:6px 0 4px;}
@@ -89,10 +114,10 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 .shovi-note{font-size:10px;color:#78350f;margin-top:6px;line-height:1.5;}
 .quick-cmp{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;}
 .qbox{text-align:center;border-radius:9px;padding:9px 4px;}
-.results{background:#fff;border-radius:14px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 2px 12px rgba(31,56,100,.09);}
+.results{background:#fff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 4px 24px rgba(148,163,184,.15),0 1px 4px rgba(0,0,0,.04);}
 .verdict{padding:18px 22px;text-align:center;}
-.verdict.g{background:linear-gradient(135deg,#bbf7d0,#d4edda);border-bottom:2px solid #16a34a;}
-.verdict.b{background:linear-gradient(135deg,#bfdbfe,#dbeafe);border-bottom:2px solid #1F3864;}
+.verdict.g{background:linear-gradient(135deg,#bbf7d0 0%,#d1fae5 100%);border-bottom:3px solid #16a34a;}
+.verdict.b{background:linear-gradient(135deg,#bfdbfe 0%,#e0e7ff 100%);border-bottom:3px solid #1e3a8a;}
 .vlabel{font-size:12px;font-weight:700;margin-bottom:3px;opacity:.8;}
 .verdict.g .vlabel,.verdict.g .vamt{color:#14532d;}
 .verdict.b .vlabel,.verdict.b .vamt{color:#1e3a8a;}
@@ -137,6 +162,22 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 .wx{color:#c2410c;font-weight:800;flex-shrink:0;}
 .wt{font-weight:700;font-size:12px;color:#7c2d12;margin-bottom:1px;}
 .wd{font-size:11px;color:#92400e;}
+@media(max-width:650px){
+  .cols{grid-template-columns:1fr;}
+  .card-body{padding:12px 12px 14px;}
+  .res-grid{grid-template-columns:1fr;padding:12px 14px;}
+  .bars{padding:12px 14px 4px;}
+  .km-box{margin:12px 14px 0;}
+  .infobox{margin:0 14px 14px;}
+  .verdict{padding:14px 16px;}
+  .gw{padding:0;}
+  .gc{padding:14px 16px;margin-bottom:12px;}
+  .gt td,.gt th{padding:6px 8px;font-size:11px;}
+}
+@media(max-width:400px){
+  .card-hd h2{font-size:13px;}
+  .allow-box{padding:9px 10px;}
+}
 </style>
 </head>
 <body>
@@ -342,18 +383,22 @@ function App() {
 
   return (
     <div>
-      <div className="hero">
-        <div className="hero-inner">
-          <div style={{display:'flex',alignItems:'center',gap:11,marginBottom:4}}>
-            <div style={{background:'rgba(255,255,255,.14)',borderRadius:9,padding:'7px 9px',fontSize:20}}>🚗</div>
-            <div>
-              <h1>סימולטור רכב צמוד מול רכב פרטי</h1>
-              <p>שירות המדינה — חישוב נטו הפנוי בזמן אמת</p>
-            </div>
+      <div className="bg-gradient-to-l from-blue-700 via-blue-600 to-indigo-700" style={{boxShadow:'0 4px 24px rgba(0,0,0,.22)'}}>
+        <div style={{maxWidth:1020,margin:'0 auto',padding:'28px 16px 0',textAlign:'center'}}>
+          <div style={{display:'inline-flex',alignItems:'center',justifyContent:'center',background:'rgba(255,255,255,.15)',borderRadius:16,padding:'12px 14px',fontSize:28,marginBottom:12}}>🚗</div>
+          <h1 style={{color:'#fff',fontSize:'clamp(20px,5vw,30px)',fontWeight:900,lineHeight:1.2,margin:'0 0 8px'}}>
+            סימולטור רכב צמוד מול רכב פרטי
+          </h1>
+          <p style={{color:'rgba(255,255,255,.75)',fontSize:'clamp(12px,3vw,14px)',marginBottom:6,lineHeight:1.6}}>
+            שירות המדינה — השוואה כלכלית מלאה: מס שווי שימוש, החזרים, עלויות ריאליות ויתרון נסתר
+          </p>
+          <div style={{display:'inline-flex',alignItems:'center',background:'rgba(255,255,255,.12)',borderRadius:12,padding:'6px 14px',fontSize:12,color:'rgba(255,255,255,.85)',marginBottom:14,gap:6}}>
+            <span>💡</span>
+            <span>מזין 4 נתונים — מקבל תשובה מיידית מה משתלם יותר</span>
           </div>
-          <div className="tabs">
+          <div style={{display:'flex',justifyContent:'center',gap:5,marginTop:4}}>
             <button className={'tab '+(tab==='sim'?'on':'off')} onClick={()=>setTab('sim')}>🧮 סימולטור</button>
-            <button className={'tab '+(tab==='guide'?'on':'off')} onClick={()=>setTab('guide')}>📖 מדריך</button>
+            <button className={'tab '+(tab==='guide'?'on':'off')} onClick={()=>setTab('guide')}>📖 מדריך מתודולוגי</button>
           </div>
         </div>
       </div>
@@ -698,60 +743,230 @@ function App() {
 
       </>) : (
         <div className="gw">
-          <div className="gc">
-            <h3>📋 שווי שימוש ברכב צמוד</h3>
-            <p>רכב צמוד = הטבה חייבת במס: <strong>2.48% ממחיר המחירון לחודש</strong>, בניכוי הפחתה לפי סוג מנוע. מתווסף לברוטו ומחויב במס שולי מלא. דלק, ביטוח, אגרה וטיפולים — על המעסיק. אך כל ההחזרים הקבועים (676+387+340+נסיעות) נמחקים לחלוטין.</p>
+
+          {/* כרטיס מבוא */}
+          <div className="gc" style={{background:'linear-gradient(135deg,#eff6ff,#eef2ff)',border:'2px solid #c7d2fe'}}>
+            <h3 style={{color:'#1e3a8a',fontSize:16}}>🎯 למה נועד הסימולטור?</h3>
+            <p style={{fontSize:14,lineHeight:1.8,color:'#1e3a8a'}}>
+              קבלת החלטה שגויה בין רכב צמוד לרכב פרטי עלולה לעלות לעובד <strong>מאות עד אלפי שקלים בחודש</strong> — בלי שישים לב. הסימולטור הזה מחשב את <strong>השורה התחתונה האמיתית</strong>: כמה כסף נשאר בכיס בכל מסלול, לאחר מס, החזרים, עלויות ריאליות ויתרונות נסתרים. מזינים 4 נתונים — מקבלים תשובה מיידית.
+            </p>
           </div>
+
+          {/* שלב 1 */}
           <div className="gc">
-            <h3>⚡ הפחתות שווי שימוש לפי סוג מנוע</h3>
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
+              <div style={{background:'#1e3a8a',color:'#fff',borderRadius:'50%',width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:14,flexShrink:0}}>1</div>
+              <h3 style={{margin:0}}>מדרגת המס השולי המשולב</h3>
+            </div>
+            <p style={{marginBottom:12}}>המס על השקל האחרון שמרוויחים — מורכב משלושה רכיבים:</p>
+            <table className="gt">
+              <thead><tr><th>טווח שכר ברוטו</th><th>מס שולי משולב</th><th>הרכב</th></tr></thead>
+              <tbody>
+                <tr><td>עד 7,500</td><td style={{fontWeight:700}}>~20%</td><td>מס הכנסה נמוך + ביטוח לאומי מופחת</td></tr>
+                <tr><td>7,500 – 16,000</td><td style={{fontWeight:700}}>~29%</td><td>מס בסיסי + ביטוח לאומי מלא 12%</td></tr>
+                <tr><td>16,000 – 22,000</td><td style={{fontWeight:700,color:'#c2410c'}}>43%</td><td>מס 31% + ביטוח לאומי מלא — שכיח בדרגות ביניים</td></tr>
+                <tr><td>22,000 – 45,000</td><td style={{fontWeight:700,color:'#c2410c'}}>47%</td><td>מס 35% + ביטוח לאומי מלא — מהנדסים, כלכלנים</td></tr>
+                <tr><td>45,000 – 49,000</td><td style={{fontWeight:700,color:'#dc2626'}}>59% ⚠️</td><td>פסגת ההר — מס 47% + ביטוח לאומי מלא</td></tr>
+                <tr><td>מעל 49,000</td><td style={{fontWeight:700,color:'#7c3aed'}}>50%</td><td>מס 50% + ביטוח לאומי 0% (מעבר תקרה)</td></tr>
+              </tbody>
+            </table>
+            <div style={{background:'#fef9c3',borderRadius:8,padding:'8px 12px',marginTop:10,fontSize:12,color:'#713f12'}}>
+              ⚠️ <strong>תופעת הצוקי ב-45–49 אלף:</strong> על כל עלייה בברוטו (כגון שווי שימוש) — 59% הולך למדינה.
+            </div>
+          </div>
+
+          {/* שלב 2 */}
+          <div className="gc">
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
+              <div style={{background:'#c2410c',color:'#fff',borderRadius:'50%',width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:14,flexShrink:0}}>2</div>
+              <h3 style={{margin:0}}>חישוב עלות רכב צמוד — מה באמת עולה?</h3>
+            </div>
+            <p style={{marginBottom:10}}>
+              רכב צמוד = הטבה חייבת במס. מחושב לפי: <strong>2.48% ממחיר המחירון לחודש</strong>, בניכוי הפחתה לפי סוג המנוע.
+            </p>
+            <div style={{background:'#fff7ed',border:'1px solid #fed7aa',borderRadius:10,padding:'12px 14px',marginBottom:12,fontSize:13}}>
+              <div style={{fontWeight:700,color:'#9a3412',marginBottom:6}}>דוגמה — רכב חשמלי במחיר ₪170,000 + מדרגת מס 47%:</div>
+              <div style={{display:'flex',flexDirection:'column',gap:4,color:'#7c2d12'}}>
+                <div>2.48% × ₪170,000 = <strong>₪4,216</strong> שווי רעיוני</div>
+                <div>פחות הפחתת EV: <strong>₪4,216 − ₪1,380 = ₪2,836</strong> שווי חייב במס</div>
+                <div>מס 47%: <strong>₪2,836 × 47% = ₪1,333/חודש</strong> — זו העלות הנטו</div>
+              </div>
+            </div>
+            <p style={{marginBottom:8,fontWeight:700,color:'#374151'}}>הפחתות לפי סוג מנוע:</p>
             <table className="gt">
               <thead><tr><th>סוג מנוע</th><th>הפחתה חודשית</th><th>חיסכון נטו (47%)</th></tr></thead>
               <tbody>
-                <tr><td>🔋 חשמלי (EV)</td><td style={{fontWeight:700,color:'#15803d'}}>{ILS}1,380</td><td style={{color:'#15803d',fontWeight:700}}>~{ILS}649</td></tr>
+                <tr><td>🔋 חשמלי מלא (BEV)</td><td style={{fontWeight:700,color:'#15803d'}}>{ILS}1,380</td><td style={{color:'#15803d',fontWeight:700}}>~{ILS}649</td></tr>
                 <tr><td>🔌 היברידי נטען (PHEV)</td><td style={{fontWeight:700}}>{ILS}1,150</td><td style={{fontWeight:700}}>~{ILS}541</td></tr>
                 <tr><td>⚡ היברידי (HEV)</td><td style={{fontWeight:700}}>{ILS}580</td><td style={{fontWeight:700}}>~{ILS}273</td></tr>
-                <tr><td>⛽ בנזין / דיזל</td><td style={{fontWeight:700,color:'#c2410c'}}>{ILS}0</td><td style={{color:'#c2410c'}}>אין</td></tr>
+                <tr><td>⛽ בנזין / דיזל</td><td style={{fontWeight:700,color:'#c2410c'}}>{ILS}0</td><td style={{color:'#c2410c'}}>אין הפחתה</td></tr>
               </tbody>
             </table>
+            <div style={{background:'#fef2f2',border:'1px solid #fecaca',borderRadius:8,padding:'8px 12px',marginTop:10,fontSize:12,color:'#7f1d1d'}}>
+              🔴 <strong>חשוב:</strong> ברכב צמוד — דלק, ביטוח, אגרה וטיפולים על המעסיק. אך כל ההחזרים הקבועים (676+387+340+נסיעות) <strong>נמחקים מהתלוש לחלוטין</strong>.
+            </div>
           </div>
+
+          {/* שלב 3 */}
           <div className="gc">
-            <h3>📉 ירידת ערך — 5 מדרגות עם רצפת שווי</h3>
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
+              <div style={{background:'#15803d',color:'#fff',borderRadius:'50%',width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:14,flexShrink:0}}>3</div>
+              <h3 style={{margin:0}}>ההחזרים שרק רכב פרטי מקבל (דרגה ד')</h3>
+            </div>
+            <p style={{marginBottom:10}}>ארבעה רכיבים שנכנסים לתלוש <strong>רק</strong> כשיש רכב פרטי:</p>
             <table className="gt">
-              <thead><tr><th>שווי נוכחי</th><th>קצב חודשי</th><th>הגיון כלכלי</th></tr></thead>
+              <thead><tr><th>רכיב</th><th>סכום נטו</th><th>אופי</th></tr></thead>
               <tbody>
-                <tr><td>מעל {ILS}150,000</td><td style={{fontWeight:700,color:'#dc2626'}}>1.25%</td><td>רכב חדש — ירידה מהירה</td></tr>
-                <tr><td>{ILS}80,000–150,000</td><td style={{fontWeight:700,color:'#d97706'}}>0.85%</td><td>יד שנייה צעירה</td></tr>
-                <tr><td>{ILS}30,000–80,000</td><td style={{fontWeight:700,color:'#65a30d'}}>0.55%</td><td>מתיישן — ירידה איטית</td></tr>
-                <tr><td>{ILS}5,000–30,000</td><td style={{fontWeight:700,color:'#16a34a'}}>0.25%</td><td>דעיכה עמוקה</td></tr>
-                <tr><td>מתחת ל-{ILS}5,000</td><td style={{fontWeight:700}}>0%</td><td>רצפת שווי — אין ירידה</td></tr>
+                <tr>
+                  <td>קבועות נטו (אחזקה)</td>
+                  <td style={{fontWeight:700,color:'#15803d'}}>{ILS}676</td>
+                  <td>מגולם — המעסיק משלם גם את המס, העובד מקבל נטו מלא</td>
+                </tr>
+                <tr>
+                  <td>קבועות נטו (הוצאות)</td>
+                  <td style={{fontWeight:700,color:'#15803d'}}>{ILS}387</td>
+                  <td>מגולם — כנ"ל</td>
+                </tr>
+                <tr>
+                  <td>אגרה/טסט ({ILS}340 ברוטו)</td>
+                  <td style={{fontWeight:700}}>{ILS}180–{ILS}200</td>
+                  <td>לא מגולם — מנוכה מס שולי. נטו = 340 × (1 − מס%)</td>
+                </tr>
+                <tr>
+                  <td>החזר נסיעות — קצר</td>
+                  <td style={{fontWeight:700,color:'#15803d'}}>{ILS}323</td>
+                  <td>מגולם — עד 20 ק"מ מהעבודה</td>
+                </tr>
+                <tr>
+                  <td>החזר נסיעות — בינוני</td>
+                  <td style={{fontWeight:700,color:'#15803d'}}>{ILS}464</td>
+                  <td>מגולם — 20–40 ק"מ מהעבודה</td>
+                </tr>
+                <tr>
+                  <td>החזר נסיעות — רחוק</td>
+                  <td style={{fontWeight:700,color:'#15803d'}}>{ILS}684</td>
+                  <td>מגולם — מעל 40 ק"מ מהעבודה</td>
+                </tr>
               </tbody>
             </table>
+            <div style={{background:'#dcfce7',border:'1px solid #86efac',borderRadius:8,padding:'8px 12px',marginTop:10,fontSize:12,color:'#14532d'}}>
+              ✅ <strong>גילום מס:</strong> כאשר החזר מגולם, המעסיק משלם גם את המס עבור העובד. כך {ILS}676 מגולם שווה ל-{ILS}676 בנטו — לא פחות.
+            </div>
           </div>
+
+          {/* שלב 4 */}
           <div className="gc">
-            <h3>🔧 טיפולים ותחזוקה לפי שווי + מנוע</h3>
-            <table className="gt">
-              <thead><tr><th>קבוצת שווי</th><th>עלות לק"מ</th><th>הגיון</th></tr></thead>
-              <tbody>
-                <tr><td>EV מעל {ILS}150,000</td><td style={{fontWeight:700,color:'#15803d'}}>7–8 אג׳</td><td>כמעט אין שמנים/פילטרים — צמיגים בלבד</td></tr>
-                <tr><td>EV אחר</td><td style={{fontWeight:700,color:'#15803d'}}>10 אג׳</td><td>תחזוקה מינימלית</td></tr>
-                <tr><td>מעל {ILS}140,000 (שב"כ)</td><td style={{fontWeight:700}}>15 אג׳</td><td>מוסך מורשה, אחריות יבואן</td></tr>
-                <tr><td>{ILS}70,000–140,000</td><td style={{fontWeight:700}}>20 אג׳</td><td>יוצא מאחריות, בלאי טבעי</td></tr>
-                <tr><td>מתחת ל-{ILS}70,000</td><td style={{fontWeight:700,color:'#c2410c'}}>27 אג׳</td><td>תקלות תדירות, חלפים זולים</td></tr>
-              </tbody>
-            </table>
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
+              <div style={{background:'#7e22ce',color:'#fff',borderRadius:'50%',width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:14,flexShrink:0}}>4</div>
+              <h3 style={{margin:0}}>עלויות ריאליות של רכב פרטי</h3>
+            </div>
+            <p style={{marginBottom:10}}>ארבע הוצאות שצריך להכיר — <strong>לא רק דלק:</strong></p>
+
+            <div style={{display:'flex',flexDirection:'column',gap:10}}>
+              <div style={{background:'#f0fdf4',border:'1px solid #86efac',borderRadius:10,padding:'10px 12px'}}>
+                <div style={{fontWeight:700,color:'#14532d',marginBottom:4}}>⛽ דלק — מחושב לפי ק"מ וצריכה</div>
+                <p style={{fontSize:12,color:'#166534',margin:0}}>
+                  עלות לק"מ = מחיר ליטר ÷ ק"מ לליטר. לפי סוג המנוע: חשמלי ~11 אג׳, PHEV ~18 אג׳, HEV ~33 אג׳, בנזין ~53 אג׳.
+                </p>
+              </div>
+              <div style={{background:'#fef9c3',border:'1px solid #fde047',borderRadius:10,padding:'10px 12px'}}>
+                <div style={{fontWeight:700,color:'#713f12',marginBottom:4}}>🔧 טיפולים ובלאי — לפי שווי וגיל הרכב</div>
+                <table className="gt" style={{marginTop:6}}>
+                  <thead><tr><th>שווי נוכחי</th><th>עלות לק"מ</th><th>הגיון</th></tr></thead>
+                  <tbody>
+                    <tr><td>EV חדש (מעל {ILS}150k)</td><td style={{fontWeight:700,color:'#15803d'}}>8 אג׳</td><td>רק צמיגים ונוזל בלמים</td></tr>
+                    <tr><td>מעל {ILS}140k</td><td style={{fontWeight:700}}>15 אג׳</td><td>מוסך מורשה + אחריות</td></tr>
+                    <tr><td>{ILS}70k–{ILS}140k</td><td style={{fontWeight:700}}>20 אג׳</td><td>יוצא מאחריות, בלאי טבעי</td></tr>
+                    <tr><td>מתחת ל-{ILS}70k</td><td style={{fontWeight:700,color:'#c2410c'}}>27 אג׳</td><td>תקלות תדירות</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style={{background:'#fff1f2',border:'1px solid #fecaca',borderRadius:10,padding:'10px 12px'}}>
+                <div style={{fontWeight:700,color:'#9f1239',marginBottom:4}}>📉 ירידת ערך — ההוצאה הנסתרת הגדולה</div>
+                <p style={{fontSize:12,color:'#881337',margin:'0 0 6px'}}>
+                  רכב ב-{ILS}120,000 יורד בערכו ~{ILS}1,000/חודש. זו הוצאה אמיתית גם אם לא "יוצאת מהכיס" ישירות.
+                </p>
+                <table className="gt">
+                  <thead><tr><th>שווי נוכחי</th><th>%/חודש</th><th>לדוגמה</th></tr></thead>
+                  <tbody>
+                    <tr><td>מעל {ILS}150k</td><td style={{color:'#dc2626',fontWeight:700}}>1.25%</td><td>₪1,875/חודש על רכב של ₪150k</td></tr>
+                    <tr><td>{ILS}80k–{ILS}150k</td><td style={{color:'#d97706',fontWeight:700}}>0.85%</td><td>₪850/חודש על רכב של ₪100k</td></tr>
+                    <tr><td>{ILS}30k–{ILS}80k</td><td style={{color:'#65a30d',fontWeight:700}}>0.55%</td><td>₪275/חודש על רכב של ₪50k</td></tr>
+                    <tr><td>{ILS}5k–{ILS}30k</td><td style={{fontWeight:700}}>0.25%</td><td>₪50/חודש על רכב של ₪20k</td></tr>
+                    <tr><td>מתחת ל-{ILS}5k</td><td style={{fontWeight:700}}>0%</td><td>רצפת שווי — אין ירידה נוספת</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style={{background:'#fdf4ff',border:'1px solid #d8b4fe',borderRadius:10,padding:'10px 12px'}}>
+                <div style={{fontWeight:700,color:'#6b21a8',marginBottom:4}}>💰 עלות הון — הכסף ברכב עולה כסף</div>
+                <p style={{fontSize:12,color:'#7e22ce',margin:0}}>
+                  רכב ב-{ILS}120,000 עם 50% הלוואה בריבית 4% + 50% הון עצמי בתשואה 4% = <strong>{ILS}400/חודש</strong> עלות הון.
+                  בין אם לקחת הלוואה (ריבית ממשית) ובין אם שילמת מזומן (הפסד תשואה) — זו עלות אמיתית.
+                </p>
+              </div>
+            </div>
           </div>
+
+          {/* שלב 5 */}
           <div className="gc">
-            <h3>⚠️ טעויות נפוצות</h3>
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
+              <div style={{background:'#0369a1',color:'#fff',borderRadius:'50%',width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:14,flexShrink:0}}>5</div>
+              <h3 style={{margin:0}}>היתרון הנסתר של רכב צמוד</h3>
+            </div>
+            <p style={{marginBottom:10}}>
+              שני גורמים שהסימולטור מאפשר לכמת — ולרוב לא נלקחים בחשבון:
+            </p>
+            <div style={{display:'flex',flexDirection:'column',gap:10}}>
+              <div style={{background:'#e0f2fe',border:'1px solid #7dd3fc',borderRadius:10,padding:'10px 12px'}}>
+                <div style={{fontWeight:700,color:'#0c4a6e',marginBottom:4}}>🎁 ק"מ בונוס (10–15%)</div>
+                <p style={{fontSize:12,color:'#075985',margin:0}}>
+                  כשהדלק חינם, נוסעים 10–15% יותר ק"מ שלא היו נוסעים אחרת. הערך הכלכלי שלהם = <strong>חצי</strong> מהעלות הרגילה — כי לא היו נוסעים אותם במחיר מלא.
+                </p>
+              </div>
+              <div style={{background:'#e0f2fe',border:'1px solid #7dd3fc',borderRadius:10,padding:'10px 12px'}}>
+                <div style={{fontWeight:700,color:'#0c4a6e',marginBottom:4}}>🚙 הסטה מרכב שני</div>
+                <p style={{fontSize:12,color:'#075985',margin:0}}>
+                  אם יש רכב שני בבית — חלק מהנסיעות שהיו על הרכב השני עוברות לצמוד. חיסכון <strong>מלא</strong>: עלות הדלק + הבלאי של אותם ק"מ נחסכת מהרכב הפרטי.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* שלב 6 — נקודת איזון */}
+          <div className="gc">
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
+              <div style={{background:'#92400e',color:'#fff',borderRadius:'50%',width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:14,flexShrink:0}}>6</div>
+              <h3 style={{margin:0}}>נקודת האיזון — מתי רכב פרטי כדאי?</h3>
+            </div>
+            <p style={{marginBottom:10}}>
+              נקודת האיזון = כמה ק"מ תפקידי <strong>חייבים</strong> לנסוע מדי חודש כדי שהחזר הק"מ יכסה את ההפרש בין עלויות הרכב הפרטי לעלות המס על שווי השימוש.
+            </p>
+            <div style={{background:'#fef9c3',border:'1px solid #fde047',borderRadius:10,padding:'10px 12px',fontSize:12,color:'#713f12'}}>
+              <strong>נוסחה:</strong> נקודת איזון (ק"מ/חודש) = (עלויות רכב פרטי − עלות מס שווי שימוש) ÷ (₪0.68 × (1 − מס%))
+              <br/><br/>
+              <strong>דוגמה:</strong> עלויות ₪2,500 − עלות מס ₪1,333 = ₪1,167 חסר | ÷ (0.68 × 53%) = <strong>~3,232 ק"מ/חודש</strong>
+            </div>
+          </div>
+
+          {/* טעויות נפוצות */}
+          <div className="gc">
+            <h3>⚠️ 5 הטעויות הנפוצות ביותר</h3>
             {[
-              ['שוכחים שרכב צמוד מוחק את כל ההחזרים','676+387+340+נסיעות = ~1,400-1,700 שנמחקים'],
-              ['לא מחשבים ירידת ערך','ההוצאה הגדולה — עשרות אלפים בשנה'],
-              ['מתעלמים מעלות הון','הכסף ברכב עולה כסף — הלוואה או תשואה שהוחמצה'],
+              ['שוכחים שרכב צמוד מוחק את כל ההחזרים','676 + 387 + 340 + נסיעות = ₪1,400–₪1,700 שנמחקים מהתלוש. זו ההוצאה הנסתרת הגדולה ביותר של הצמוד.'],
+              ['לא מחשבים ירידת ערך','רכב ב-₪120,000 יורד ב-₪1,000/חודש. ב-5 שנים = ₪60,000 שנאבדים בשקט.'],
+              ['מתעלמים מעלות הון','כסף שמושקע ברכב לא מרוויח תשואה. על ₪120,000 בריבית 4% = ₪400 לחודש שנעלמים.'],
+              ['מחשבים החזר ק"מ כנטו','₪0.68/ק"מ הוא ברוטו — ינוכה ממנו מס שולי מלא. בנטו: ₪0.36–₪0.39/ק"מ בלבד.'],
+              ['לא בודקים את נקודת האיזון','ללא מינימום ק"מ תפקידי — רכב פרטי כמעט אף פעם לא כדאי כלכלית.'],
             ].map(([t,d])=>(
               <div key={t} className="wrow">
                 <span className="wx">✗</span>
                 <div><div className="wt">{t}</div><div className="wd">{d}</div></div>
               </div>
             ))}
+          </div>
+
+          <div style={{background:'#dcfce7',borderRadius:12,padding:'14px 18px',border:'1px solid #86efac',fontSize:12,color:'#14532d',lineHeight:1.7}}>
+            <strong>אחריות:</strong> הסימולטור מיועד לסיוע בקבלת החלטה מושכלת ואינו ייעוץ מס. הסכומים מבוססים על תנאי דרגה ד' ועשויים להשתנות. לחישוב מחייב — יש להתייעץ עם מחלקת משאבי אנוש.
           </div>
         </div>
       )}
@@ -760,7 +975,138 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+/* ── Contact Card Component ── */
+/* ─────────────────────────────────────────────
+   CONTACT CARD
+───────────────────────────────────────────── */
+function ContactCard() {
+  const LINKS = [
+    {
+      href: 'mailto:yehoda.sadaay@gmail.com',
+      label: 'מייל',
+      text: 'yehoda.sadaay@gmail.com',
+      icon: <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+    },
+    {
+      href: 'tel:0506202972',
+      label: 'טלפון',
+      text: '050-620-2972',
+      ltr: true,
+      icon: <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+    },
+    {
+      href: 'https://www.linkedin.com/in/yehuda-saadia-628161214',
+      label: 'לינקדין',
+      text: 'יהודה סעדיה',
+      target: '_blank',
+      icon: <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+    },
+  ];
+
+  return (
+    <div id="contact-anchor" className="max-w-screen-lg mx-auto mb-4 px-4">
+      <div className="bg-gradient-to-l from-blue-700 via-blue-600 to-indigo-700 rounded-2xl shadow-xl overflow-hidden">
+        <div className="px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-white text-right">
+            <div className="text-base font-extrabold mb-0.5">יהודה סעדיה</div>
+            <div className="text-xs opacity-75">יוצר הסימולטור • לשאלות, הצעות ושיתופי פעולה</div>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {LINKS.map((link, i) => (
+              <a key={i} href={link.href}
+                target={link.target || '_self'}
+                rel={link.target ? 'noopener noreferrer' : undefined}
+                className="flex items-center gap-2 bg-white/15 hover:bg-white/25 transition-all rounded-xl px-3 py-2 text-white no-underline">
+                <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+                  {link.icon}
+                </div>
+                <div className="text-right">
+                  <div className="text-xs opacity-70 leading-none mb-0.5">{link.label}</div>
+                  <div className={`text-xs font-semibold leading-none${link.ltr ? ' direction-ltr' : ''}`}
+                    style={link.ltr ? {direction:'ltr'} : {}}>
+                    {link.text}
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   STICKY CONTACT BAR
+───────────────────────────────────────────── */
+function StickyBar() {
+  const [visible, setVisible] = React.useState(true);
+  React.useEffect(() => {
+    const check = () => {
+      const el = document.getElementById('contact-anchor');
+      if (el) setVisible(el.getBoundingClientRect().top > window.innerHeight);
+    };
+    window.addEventListener('scroll', check, {passive: true});
+    check();
+    return () => window.removeEventListener('scroll', check);
+  }, []);
+
+  return (
+    <div className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}`}>
+      <div className="bg-gradient-to-l from-blue-700 via-blue-600 to-indigo-700 shadow-2xl" style={{borderTop:'1px solid rgba(255,255,255,.1)'}}>
+        <div className="max-w-screen-lg mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 text-sm">🚗</div>
+            <div className="text-white">
+              <div className="text-xs font-bold leading-tight">סימולטור רכב צמוד — שירות המדינה</div>
+              <div className="text-xs opacity-70 leading-tight">עדכני לשנת 2025</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <a href="mailto:yehoda.sadaay@gmail.com" title="yehoda.sadaay@gmail.com"
+              className="w-8 h-8 rounded-lg bg-white/15 hover:bg-white/30 flex items-center justify-center transition-all group relative">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              <span className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">yehoda.sadaay@gmail.com</span>
+            </a>
+            <a href="tel:0506202972" title="050-620-2972"
+              className="w-8 h-8 rounded-lg bg-white/15 hover:bg-white/30 flex items-center justify-center transition-all group relative">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+              <span className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">050-620-2972</span>
+            </a>
+            <a href="https://www.linkedin.com/in/yehuda-saadia-628161214" target="_blank" rel="noopener noreferrer" title="יהודה סעדיה"
+              className="w-8 h-8 rounded-lg bg-white/15 hover:bg-white/30 flex items-center justify-center transition-all group relative">
+              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              <span className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">יהודה סעדיה</span>
+            </a>
+            <div className="h-5 w-px bg-white/20 mx-1" />
+            <div className="text-white/80 text-xs">&copy; <span className="font-semibold text-white">יהודה סעדיה</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   ROOT RENDER
+───────────────────────────────────────────── */
+function AppWithExtras() {
+  return (
+    <>
+      <App />
+      <div className="max-w-screen-lg mx-auto px-4">
+        <div className="text-center py-4 text-xs text-slate-500 space-y-1 border-t border-slate-200">
+          <p>💡 הסימולטור מבוסס על נתוני 2024–2025 ומספק הערכה כללית | לחישוב מדויק יש להתייעץ עם מחלקת משאבי אנוש</p>
+          <p>⚠ ערכי דרגה ד' מוגדרים כברירת מחדל — עדכן לפי הסכמך הספציפי</p>
+        </div>
+      </div>
+      <ContactCard />
+      <StickyBar />
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(AppWithExtras));
 </script>
 </body>
 </html>
